@@ -4,7 +4,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 import asyncio
-import openai
 from discord.ext import commands as commANDs
 from discord import Intents as InTeNTs
 from discord import utils as UtIls
@@ -14,7 +13,6 @@ class D15C0R6(commANDs.Bot):
         in_tents = InTeNTs(**bot_init_data["intents"])
         self.name = bot_name
         self.xai_client = xai_client
-        self.xai_api_key = xai_client.api_key
         self.response_tokens = bot_init_data["response_tokens"]
         self.discord_token = discord_token
         self.command_prefix = bot_init_data["command_prefix"]
@@ -99,7 +97,7 @@ class D15C0R6(commANDs.Bot):
                 prompt_without_mention = message.content.replace(clean_message, "").strip()
                 prompt_without_mention = self.add_to_messages(prompt_without_mention, "user")
                 # Add context to the prompt
-                logging.debug(f"Sending usr_prompt to ChatGPT\n{prompt_without_mention}")
+                logging.debug(f"Sending usr_prompt to Grok\n{prompt_without_mention}")
                 logging.debug(f"Sending messages\n{self.messages}")
                 response_text = self.get_gpt_response(self.messages, self.gpt_model, self.response_tokens, 2, 0.55)
                 if response_text:

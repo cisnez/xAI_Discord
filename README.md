@@ -2,7 +2,7 @@
 xAI Grok chatbot for Discord
 
 ## Description
-A Discord bot using Discord `API` and xAI `API` to provide conversational functionality.
+A Discord bot using Discord `API` and xAI Grok `API` to provide conversational functionality.
 
 ## Files
 - main.py
