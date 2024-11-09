@@ -5,10 +5,10 @@ xAI Grok chatbot for Discord
 A Discord bot using Discord `API` and xAI `API` to provide conversational functionality.
 
 ## Files
-main.py
-B07_C0R3.py
-_init_botname.yaml
-_init__global.yaml
+- main.py
+- B07_C0R3.py
+- _init_botname.yaml
+- _init__global.yaml
 
 ## Usage
 1. Clone the repository to your local machine.
