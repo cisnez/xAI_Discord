@@ -1,0 +1,27 @@
+# _init_botname.yaml
+command_prefix: "~"
+username: "JayaByrd"
+gpt_model: "grok-beta"
+intents:
+  typing: true
+  presences: true
+  messages: true
+  guilds: true
+  members: false
+  message_content: true
+ignored_prefixes:
+  - "rpg"
+bot_channel_id: 1088511652619632670
+self_channel_id: 971587271780360202
+self_author_id: &selfAuthorID 971580205586067526
+self_author_name: "JayaByrd#8578"
+home_channel_id: 971587271780360202
+hello_channel_id: 875425963448610859
+ignore_channel_ids:
+ -
+ignore_author_ids:
+ - *selfAuthorID
+allow_channel_ids:
+ - 
+allow_author_ids:
+ - 
