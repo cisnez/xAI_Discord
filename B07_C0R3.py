@@ -34,7 +34,7 @@ class D15C0R6(commANDs.Bot):
         self.ignore_channel_ids = set(bot_init_data["ignore_channel_ids"])
         #Set the first message in messages array
         self.messages = [{
-        "role": "system", "content": f"You are my trusted pithy friend named {self.name}. Keep your response under {self.response_tokens} tokens. Pay attention to user names for context, and tailor responses accordingly. Do not return message starting with username:. The chat program will add that."
+        "role": "system", "content": f"You are my trusted pithy friend named {self.name}. Keep your response under {self.response_tokens} tokens. Pay attention to user names for context, and tailor responses accordingly."
             }]
         # Parent class assignments for: super().__init__()
         super().__init__(command_prefix=self.command_prefix, intents=in_tents)
