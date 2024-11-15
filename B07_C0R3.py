@@ -1,7 +1,7 @@
 # B07_C0R3.py
 import logging
 # Set logging.DEBUG to see ALL logs; set logging.INFO for less
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 import asyncio
 from discord.ext import commands as commANDs
@@ -34,7 +34,7 @@ class D15C0R6(commANDs.Bot):
         self.ignore_channel_ids = set(bot_init_data["ignore_channel_ids"])
         #Set the first message in messages array
         self.messages = [{
-        "role": "system", "content": f"You are my pithy friend. Keep your response under {self.response_tokens} tokens."
+        "role": "system", "content": f"You are my trusted pithy friend named {self.name}. Keep your response under {self.response_tokens} tokens. Pay attention to user names for context, and tailor responses accordingly. Do not return message starting with username:. The chat program will add that."
             }]
         # Parent class assignments for: super().__init__()
         super().__init__(command_prefix=self.command_prefix, intents=in_tents)
@@ -88,20 +88,23 @@ class D15C0R6(commANDs.Bot):
             await message.channel.send("Hello Channel!")
         
         elif message.author.id in self.allow_author_ids:
-            logging.info(f"Message from {message.author.name} received:\n{message.content}")
+            logging.info(f"\nMessage from {message.author.name} received:\n{message.content}\n")
             # The bot will show as typing while executing the code inside this block
             # So place your logic that takes time inside this block
+            member = message.author
+            nickname = member.nick if member.nick is not None else member.display_name
+            logging.debug(f"\nAuthor Class:\n{dir(message.author)}\n")
             async with message.channel.typing():
                 # Remove bot's mention from the message
                 clean_message = UtIls.remove_markdown(str(self.user.mention))
                 prompt_without_mention = message.content.replace(clean_message, "").strip()
-                prompt_without_mention = self.add_to_messages(prompt_without_mention, "user")
+                prompt_without_mention = self.add_to_messages(nickname, prompt_without_mention, "user")
                 # Add context to the prompt
                 logging.debug(f"Sending usr_prompt to Grok\n{prompt_without_mention}")
                 logging.debug(f"Sending messages\n{self.messages}")
                 response_text = self.get_gpt_response(self.messages, self.gpt_model, self.response_tokens, 2, 0.55)
                 if response_text:
-                    self.add_to_messages(response_text, "assistant")
+                    self.add_to_messages(self.name, response_text, "assistant")
                     logging.debug(f"Message history:\n{self.messages}")
                     await message.channel.send(response_text)
                 else:
@@ -117,19 +120,19 @@ class D15C0R6(commANDs.Bot):
         await self.process_commands(message)
         logging.debug(f'\n-- END ON_MESSAGE --\n')
 
-    def add_to_messages(self, message, role):
+    def add_to_messages(self, nickname, message, role):
         if role == "assistant":
             self.messages.append({
                 "role": "assistant",
-                "content": message
+                "content": f"{message}"
             })
         elif role == "user":
             self.messages.append({
                 "role": "user",
-                "content": message
+                "content": f'{nickname} says, "{message}"'
             })
-        if len(self.messages) > 7:  # Keep 7 messages for example
-            del self.messages[1:2]
+        if len(self.messages) > 11:  # Keep 7 messages for example
+            self.messages.pop(1)
         return self.messages
 
     def get_gpt_response(self, messages, model, max_response_tokens, n_responses, creativity):
