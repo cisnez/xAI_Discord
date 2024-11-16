@@ -1,7 +1,8 @@
 # _init_botname.yaml
 command_prefix: "~"
-username: "JayaByrd"
+username: &username "BotName"
 gpt_model: "grok-beta"
+system_message: "You are my trusted pithy friend. Keep your response under 300 tokens. Pay attention to user names for context, and tailor responses accordingly. Embelish your message with :emoji:."
 intents:
   typing: true
   presences: true
@@ -11,12 +12,12 @@ intents:
   message_content: true
 ignored_prefixes:
   - "rpg"
-bot_channel_id: 1088511652619632670
-self_channel_id: 971587271780360202
-self_author_id: &selfAuthorID 971580205586067526
-self_author_name: "JayaByrd#8578"
-home_channel_id: 971587271780360202
-hello_channel_id: 875425963448610859
+bot_channel_id: 
+self_channel_id: 
+self_author_id: &selfAuthorID 
+self_author_name: ""
+home_channel_id: 
+hello_channel_id: 
 ignore_channel_ids:
  -
 ignore_author_ids:

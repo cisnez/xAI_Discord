@@ -11,7 +11,7 @@ bot_name = sys.argv[1].lower()
 
 # Get key and token from the OS environment
 xai_api_key = os.getenv("XAI_API_KEY")
-bot_discord_token = os.environ.get(f'DISCORD_TOKEN')
+bot_discord_token = os.environ.get(f'{bot_name.upper()}_TOKEN')
 
 # Create xAI API Client
 xai_client = OpenAI(

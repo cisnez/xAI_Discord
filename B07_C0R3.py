@@ -1,7 +1,7 @@
 # B07_C0R3.py
 import logging
 # Set logging.DEBUG to see ALL logs; set logging.INFO for less
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 import asyncio
 from discord.ext import commands as commANDs
@@ -21,6 +21,7 @@ class D15C0R6(commANDs.Bot):
         self.ignored_prefixes = bot_init_data["ignored_prefixes"]
         self.username = bot_init_data["username"]
         self.gpt_model = bot_init_data["gpt_model"]
+        self.system_message = [{"role": "system", "content": bot_init_data["system_message"]}]
         self.home_channel_id = bot_init_data["home_channel_id"]
         self.self_channel_id = bot_init_data["self_channel_id"]
         self.self_author_id = bot_init_data["self_author_id"]
@@ -32,10 +33,8 @@ class D15C0R6(commANDs.Bot):
         self.allow_channel_ids = set(bot_init_data["allow_channel_ids"])
         self.ignore_author_ids = set(bot_init_data["ignore_author_ids"])
         self.ignore_channel_ids = set(bot_init_data["ignore_channel_ids"])
-        #Set the first message in messages array
-        self.messages = [{
-        "role": "system", "content": f"You are my trusted pithy friend named {self.name}. Keep your response under {self.response_tokens} tokens. Pay attention to user names for context, and tailor responses accordingly. Embelish your message with :emoji: :attitude:."
-            }]
+        # Create a messages dictionary
+        self.messages_by_channel = {}
         # Parent class assignments for: super().__init__()
         super().__init__(command_prefix=self.command_prefix, intents=in_tents)
 
@@ -86,8 +85,12 @@ class D15C0R6(commANDs.Bot):
         elif message.content.startswith('.hello'):
             logging.info('.hello')
             await message.channel.send("Hello Channel!")
-        
-        elif message.author.id in self.allow_author_ids:
+
+        elif message.content.startswith('.messages'):
+            logging.info('.messages')
+            await message.channel.send(self.messages_by_channel)
+
+        elif message.author.id in self.allow_author_ids or message.channel.id in self.allow_channel_ids:
             logging.info(f"\nMessage from {message.author.name} received:\n{message.content}\n")
             # The bot will show as typing while executing the code inside this block
             # So place your logic that takes time inside this block
@@ -98,14 +101,13 @@ class D15C0R6(commANDs.Bot):
                 # Remove bot's mention from the message
                 clean_message = UtIls.remove_markdown(str(self.user.mention))
                 prompt_without_mention = message.content.replace(clean_message, "").strip()
-                prompt_without_mention = self.add_to_messages(nickname, prompt_without_mention, "user")
+                messages = self.add_to_messages(message.channel.id, nickname, prompt_without_mention, "user")
                 # Add context to the prompt
-                logging.debug(f"Sending usr_prompt to Grok\n{prompt_without_mention}")
-                logging.debug(f"Sending messages\n{self.messages}")
-                response_text = self.get_gpt_response(self.messages, self.gpt_model, self.response_tokens, 2, 0.55)
+                logging.debug(f"\nSending usr_prompt to Grok\n{messages}\n")
+                response_text = self.get_gpt_response(messages, self.gpt_model, self.response_tokens, 2, 0.72)
                 if response_text:
-                    self.add_to_messages(self.name, response_text, "assistant")
-                    logging.debug(f"Message history:\n{self.messages}")
+                    self.add_to_messages(message.channel.id, self.name, response_text, "assistant")
+                    logging.debug(f"\nMessage history:\n{self.messages_by_channel[message.channel.id]}\n")
                     await message.channel.send(response_text)
                 else:
                     logging.error("No response from get_gpt_response")
@@ -120,20 +122,23 @@ class D15C0R6(commANDs.Bot):
         await self.process_commands(message)
         logging.debug(f'\n-- END ON_MESSAGE --\n')
 
-    def add_to_messages(self, nickname, message, role):
+    def add_to_messages(self, channel, nickname, message, role):
+        if channel not in self.messages_by_channel:
+           self.messages_by_channel[channel] = []
+           self.messages_by_channel[channel].extend(self.system_message)
         if role == "assistant":
-            self.messages.append({
+            self.messages_by_channel[channel].append({
                 "role": "assistant",
                 "content": f"{message}"
             })
         elif role == "user":
-            self.messages.append({
+            self.messages_by_channel[channel].append({
                 "role": "user",
                 "content": f'{nickname} says, "{message}"'
             })
-        if len(self.messages) > 11:  # Keep 7 messages for example
-            self.messages.pop(1)
-        return self.messages
+        if len(self.messages_by_channel[channel]) > 11:  # Keep 7 messages for example
+            self.messages_by_channel[channel].pop(1)
+        return self.messages_by_channel[channel]
 
     def get_gpt_response(self, messages, model, max_response_tokens, n_responses, creativity):
         try:
