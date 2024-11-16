@@ -86,10 +86,6 @@ class D15C0R6(commANDs.Bot):
             logging.info('.hello')
             await message.channel.send("Hello Channel!")
 
-        elif message.content.startswith('.messages'):
-            logging.info('.messages')
-            await message.channel.send(self.messages_by_channel)
-
         elif message.author.id in self.allow_author_ids or message.channel.id in self.allow_channel_ids:
             logging.info(f"\nMessage from {message.author.name} received:\n{message.content}\n")
             # The bot will show as typing while executing the code inside this block
