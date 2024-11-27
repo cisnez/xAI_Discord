@@ -67,11 +67,7 @@ class D15C0R6(commANDs.Bot):
         elif message.author.id in self.ignore_author_ids:
             logging.info(f'Ignoring message due to ignored author: {message.author.name}')
 
-        elif any(message.content.startswith(prefix) for prefix in self.ignored_prefixes):
-            for prefix in self.ignored_prefixes:
-                if message.content.startswith(prefix):
-                    logging.info(f'Ignoring message due to prefix: {prefix}\n')
-                
+               
         elif message.content.startswith('.delete') and (message.author.id in self.allow_author_ids):
             if message.reference:  # Check if the message is a reply
                 try:
@@ -85,6 +81,12 @@ class D15C0R6(commANDs.Bot):
         elif message.content.startswith('.hello'):
             logging.info('.hello')
             await message.channel.send("Hello Channel!")
+
+        elif any(message.content.startswith(prefix) for prefix in self.ignored_prefixes):
+            logging.debug(self.ignored_prefixes)
+            for prefix in self.ignored_prefixes:
+                if message.content.startswith(prefix):
+                    logging.info(f'Ignoring message due to prefix: {prefix}\n')
 
         elif message.author.id in self.allow_author_ids or message.channel.id in self.allow_channel_ids:
             logging.info(f"\nMessage from {message.author.name} received:\n{message.content}\n")
@@ -107,6 +109,7 @@ class D15C0R6(commANDs.Bot):
                     await message.channel.send(response_text)
                 else:
                     logging.error("No response from get_gpt_response")
+
         else:
             if (message.author.id != self.self_author_id):
                 logging.info('message from else')
