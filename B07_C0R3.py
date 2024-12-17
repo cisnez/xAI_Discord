@@ -72,11 +72,16 @@ class D15C0R6(commANDs.Bot):
             if message.reference:  # Check if the message is a reply
                 try:
                     referenced_message = await message.channel.fetch_message(message.reference.message_id)
-                    await referenced_message.delete()
+                    if referenced_message.author.id == self.self_author_id:
+                        await referenced_message.delete()
+                        logging.info(f"Deleted message from self, ID: {referenced_message.author.id}.")
+                        # await message.delete()  # Delete the command message
+                        # logging.info(f"Deleted command meessage from: {message.author.id}.")
+                    else:
+                        logging.info(f"Delete request for other user ID: {referenced_message.author.id}.")
                 except Exception as e:
                     await message.channel.send(f"Error deleting message: {e}")
                     logging.error(f"Error deleting message: {e}")
-            await message.delete()  # Delete the command message
         
         elif message.content.startswith('.hello'):
             logging.info('.hello')
