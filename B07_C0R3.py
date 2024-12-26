@@ -38,26 +38,12 @@ class D15C0R6(commANDs.Bot):
         # Parent class assignments for: super().__init__()
         super().__init__(command_prefix=self.command_prefix, intents=in_tents)
 
-        # Set a variable for run_until_disconnected method
-        self.should_continue = True
-
     async def close(self):
         await super().close()
     
     async def on_ready(self):
         logging.info(f"{self.user} is connected to Discord and ready to receive commands.")
 
-    async def run_until_disconnected(self):
-        while self.should_continue:
-            try:
-                await self.start(self.discord_token)
-            except Exception as e:
-                logging.info(f"Error: {e}")
-            if self.should_continue:
-                await asyncio.sleep(5)
-            else:
-                await self.wait_for("close")  # Wait for the close event to complete
-    
     # If you define an on_message event, the bot will not process commands automatically unless you explicitly call `await self.process_commands(message)`. This is because the `on_message`` event is processed before the command, so if you don't call `process_commands`, the command processing stops at `on_message`.
     async def on_message(self, message):
         logging.debug(f'\n-- BEGIN ON_MESSAGE --')
@@ -66,8 +52,7 @@ class D15C0R6(commANDs.Bot):
 
         elif message.author.id in self.ignore_author_ids:
             logging.info(f'Ignoring message due to ignored author: {message.author.name}')
-
-               
+ 
         elif message.content.startswith('.delete') and (message.author.id in self.allow_author_ids):
             if message.reference:  # Check if the message is a reply
                 try:
@@ -86,6 +71,10 @@ class D15C0R6(commANDs.Bot):
         elif message.content.startswith('.hello'):
             logging.info('.hello')
             await message.channel.send("Hello Channel!")
+
+        elif message.content.startswith('.shutdown') and (message.author.id in self.allow_author_ids):
+            logging.info('.shutdown')
+            await self.close()
 
         elif any(message.content.startswith(prefix) for prefix in self.ignored_prefixes):
             logging.debug(self.ignored_prefixes)
