@@ -105,13 +105,13 @@ class D15C0R6(commANDs.Bot):
                 messages = self.add_to_messages(message.channel.id, nickname, prompt_without_mention, "user")
                 # Add context to the prompt
                 logging.debug(f"\nSending usr_prompt to Grok\n{messages}\n")
-                response_text = self.get_gpt_response(messages, self.gpt_model, self.response_tokens, 2, 0.72)
+                response_text = self.get_response(messages, self.gpt_model, self.response_tokens, 1, 0.55)
                 if response_text:
                     self.add_to_messages(message.channel.id, self.name, response_text, "assistant")
                     logging.debug(f"\nMessage history:\n{self.messages_by_channel[message.channel.id]}\n")
                     await message.channel.send(response_text)
                 else:
-                    logging.error("No response from get_gpt_response")
+                    logging.error("No response from get_response")
 
         else:
             if (message.author.id != self.self_author_id):
@@ -142,16 +142,16 @@ class D15C0R6(commANDs.Bot):
             self.messages_by_channel[channel].pop(1)
         return self.messages_by_channel[channel]
 
-    def get_gpt_response(self, messages, model, max_response_tokens, n_responses, creativity):
+    def get_response(self, messages, model, max_response_tokens, n_responses, creativity):
         try:
             completions = self.xai_client.chat.completions.create(
                 # "grok-beta" set in the init file
                 model=model,
-                messages = messages,  # from build_messages method
                 # messages=[
                 #     {"role": "system", "content": sys_prompt},
                 #     {"role": "user", "content": usr_prompt},
                 # ],
+                messages = messages,  # from build_messages method
                 max_tokens = max_response_tokens,
                 n=n_responses,
                 stop=None,
@@ -161,6 +161,6 @@ class D15C0R6(commANDs.Bot):
             response = completions.choices[0].message.content
             return response
         except Exception as e:
-            exception_error = (f"Error in get_gpt_response: {e}")
+            exception_error = (f"Error in get_response: {e}")
             logging.error(exception_error)
             return exception_error
