@@ -10,7 +10,6 @@ from discord import utils as UtIls
 
 class D15C0R6(commANDs.Bot):
     def __init__(self, xai_client, discord_token, bot_init_data, bot_name):
-        in_tents = InTeNTs(**bot_init_data["intents"])
         self.name = bot_name
         self.xai_client = xai_client
         self.response_tokens = bot_init_data["response_tokens"]
@@ -36,13 +35,17 @@ class D15C0R6(commANDs.Bot):
         # Create a messages dictionary
         self.messages_by_channel = {}
         # Parent class assignments for: super().__init__()
+        in_tents = InTeNTs(**bot_init_data["intents"])
         super().__init__(command_prefix=self.command_prefix, intents=in_tents)
 
     async def close(self):
         await super().close()
     
     async def on_ready(self):
-        logging.info(f"{self.user} is connected to Discord and ready to receive commands.")
+        logging.info(f"{self.user} has connected to Discord; ready to receive commands.")
+
+    async def on_resumed(self):
+        logging.info(f"{self.user} has reconnected to Discord; ready to receive commands.")
 
     # If you define an on_message event, the bot will not process commands automatically unless you explicitly call `await self.process_commands(message)`. This is because the `on_message`` event is processed before the command, so if you don't call `process_commands`, the command processing stops at `on_message`.
     async def on_message(self, message):

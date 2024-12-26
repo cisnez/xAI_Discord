@@ -1,7 +1,6 @@
 # main.py
 import os
 import sys
-import yaml
 import asyncio
 from openai import OpenAI
 from B07_C0R3 import D15C0R6
