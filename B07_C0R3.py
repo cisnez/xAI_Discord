@@ -41,8 +41,14 @@ class D15C0R6(commANDs.Bot):
     async def close(self):
         await super().close()
     
+    async def on_connect(self):
+        logging.info(f"{self.user} has connected to Discord.")
+
+    async def on_disconnect(self):
+        logging.info(f"{self.user} has disconnected from Discord.")
+
     async def on_ready(self):
-        logging.info(f"{self.user} has connected to Discord; ready to receive commands.")
+        logging.info(f"{self.user} ready to receive commands.")
 
     async def on_resumed(self):
         logging.info(f"{self.user} has reconnected to Discord; ready to receive commands.")
