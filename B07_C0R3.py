@@ -1,8 +1,5 @@
 # B07_C0R3.py
 import logging
-# Set logging.DEBUG to see ALL logs; set logging.INFO for less
-logging.basicConfig(level=logging.INFO)
-
 import asyncio
 from discord.ext import commands as commANDs
 from discord import Intents as InTeNTs
@@ -97,7 +94,6 @@ class D15C0R6(commANDs.Bot):
             # So place your logic that takes time inside this block
             member = message.author
             nickname = member.nick if member.nick is not None else member.display_name
-            logging.debug(f"\nAuthor Class:\n{dir(message.author)}\n")
             async with message.channel.typing():
                 # Remove bot's mention from the message
                 clean_message = UtIls.remove_markdown(str(self.user.mention))

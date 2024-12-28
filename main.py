@@ -1,10 +1,18 @@
+# B07_C0R3.py
+import logging
+# Set logging.DEBUG to see ALL logs; set logging.INFO for less
+logging.basicConfig(level=logging.INFO)
+
 # main.py
 import os
 import sys
 import asyncio
 from openai import OpenAI
 from B07_C0R3 import D15C0R6
-from B07_Y4M7 import merge_yaml_files
+from B07_Y4ML import Y4ML
+
+# Create a yaml object
+yaml = Y4ML()
 
 # Bot name used for init file and Discord token
 bot_name = sys.argv[1].lower()
@@ -29,7 +37,8 @@ async def bot_main():
     # Load all required YAML files to initialize Discord Bot.
     # Merge the global and child YAML files
     config_files = ["_init__global.yaml", f"_init_{bot_name}.yaml"]
-    bot_init_data = merge_yaml_files(config_files)
+    bot_init_data = yaml.merge_yaml_files(config_files)
+    #bot_init_data = merge_yaml_files(config_files)
     # Create a new bot object using the YAML _init_bot file...
     # and the D15C0R6 constructor class from B07_C0R3.py
     bot = D15C0R6(xai_client, bot_discord_token, bot_init_data, bot_name)
