@@ -7,6 +7,7 @@ A Python based Discord bot using `Discord API` and xAI Grok `OpenAI API` to prov
 ## Files
 - main.py
 - B07_C0R3.py
+- B07_Y4ML.py
 - _init_botname.yaml
 - _init__global.yaml
 
