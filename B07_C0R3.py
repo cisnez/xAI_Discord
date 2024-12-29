@@ -79,8 +79,9 @@ class D15C0R6(commANDs.Bot):
             await message.channel.send("Hello Channel!")
 
         elif message.content.startswith('.shutdown') and (message.author.id in self.allow_author_ids):
-            logging.info('.shutdown')
+            await message.channel.send("Shutting down...")
             await self.close()
+            logging.info('.shutdown command executed.')
 
         elif any(message.content.startswith(prefix) for prefix in self.ignored_prefixes):
             logging.debug(self.ignored_prefixes)
