@@ -1,7 +1,6 @@
 # B07_Y4ML.py
 import logging
 import yaml
-import json
 
 class Y4ML:
     # Initialize a Y4ML instance.
