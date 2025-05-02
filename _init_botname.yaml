@@ -1,27 +1,12 @@
 # _init_botname.yaml
 command_prefix: "~"
-username: &username "BotName"
-gpt_model: "grok-beta"
-system_message: "You are my trusted pithy friend. Keep your response under 300 tokens. Pay attention to user names for context, and tailor responses accordingly. Embelish your message with :emoji:. Be as clear as the five clairvoyant clairs."
-intents:
-  typing: true
-  presences: true
-  messages: true
-  guilds: true
-  members: false
-  message_content: true
-ignored_prefixes:
-  - "rpg"
-bot_channel_id: 
-self_channel_id: 
-self_author_id: &selfAuthorID 
-self_author_name: ""
+specifity_creativity: 0.72  # 0.01 most specifity || 0.99 most creativity {temperature}
+system_message: "Keep your response pithy and under 300 tokens. Pay attention to user names for context, and tailor responses that include everyone in the conversation. Embelish your message with :emoji:. Be as clear as the five main clairs. Return nothing if the conversation appears to be concluded."
 home_channel_id: 
-hello_channel_id: 
 ignore_channel_ids:
  -
 ignore_author_ids:
- - *selfAuthorID
+ - 
 allow_channel_ids:
  - 
 allow_author_ids:

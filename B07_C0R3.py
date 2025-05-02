@@ -15,15 +15,9 @@ class D15C0R6(commANDs.Bot):
         
         # Assign all yaml values within the __init__ method
         self.ignored_prefixes = bot_init_data["ignored_prefixes"]
-        self.username = bot_init_data["username"]
-        self.gpt_model = bot_init_data["gpt_model"]
+        self.llm_model = bot_init_data["llm_model"]
         self.system_message = [{"role": "system", "content": bot_init_data["system_message"]}]
         self.home_channel_id = bot_init_data["home_channel_id"]
-        self.self_channel_id = bot_init_data["self_channel_id"]
-        self.self_author_id = bot_init_data["self_author_id"]
-        self.self_author_name = bot_init_data["self_author_name"]
-        self.bot_channel_id = bot_init_data["bot_channel_id"]
-        self.hello_channel_id = bot_init_data["hello_channel_id"]
         # A set ensures that these collections only store unique elements
         self.allow_author_ids = set(bot_init_data["allow_author_ids"])
         self.allow_channel_ids = set(bot_init_data["allow_channel_ids"])
@@ -52,14 +46,14 @@ class D15C0R6(commANDs.Bot):
 
     # If you define an on_message event, the bot will not process commands automatically unless you explicitly call `await self.process_commands(message)`. This is because the `on_message`` event is processed before the command, so if you don't call `process_commands`, the command processing stops at `on_message`.
     async def on_message(self, message):
-        logging.debug(f'\n-- BEGIN ON_MESSAGE --')
+        logging.debug(f"\n-- BEGIN ON_MESSAGE --")
         if message.channel.id in self.ignore_channel_ids:
-            logging.info(f'Ignored Channel ID: {message.channel.name}\n')
+            logging.info(f"Ignored Channel ID: {message.channel.name}\n")
 
         elif message.author.id in self.ignore_author_ids:
-            logging.info(f'Ignoring message due to ignored author: {message.author.name}')
+            logging.info(f"Ignoring message due to ignored author: {message.author.name}")
  
-        elif message.content.startswith('.delete') and (message.author.id in self.allow_author_ids):
+        elif message.content.startswith(".delete") and (message.author.id in self.allow_author_ids):
             if message.reference:  # Check if the message is a reply
                 try:
                     referenced_message = await message.channel.fetch_message(message.reference.message_id)
@@ -74,22 +68,22 @@ class D15C0R6(commANDs.Bot):
                     await message.channel.send(f"Error deleting message: {e}")
                     logging.error(f"Error deleting message: {e}")
         
-        elif message.content.startswith('.hello'):
-            logging.info('.hello')
+        elif message.content.startswith(".hello"):
+            logging.info(".hello")
             await message.channel.send("Hello Channel!")
 
-        elif message.content.startswith('.shutdown') and (message.author.id in self.allow_author_ids):
+        elif message.content.startswith(".shutdown") and (message.author.id in self.allow_author_ids):
             await message.channel.send("Shutting down...")
             await self.close()
-            logging.info('.shutdown command executed.')
+            logging.info(".shutdown command executed.")
 
         elif any(message.content.startswith(prefix) for prefix in self.ignored_prefixes):
             logging.debug(self.ignored_prefixes)
             for prefix in self.ignored_prefixes:
                 if message.content.startswith(prefix):
-                    logging.info(f'Ignoring message due to prefix: {prefix}\n')
+                    logging.info(f"Ignoring message due to prefix: {prefix}\n")
 
-        elif message.author.id in self.allow_author_ids or message.channel.id in self.allow_channel_ids:
+        elif message.channel.id in self.allow_channel_ids or self.user in message.mentions:
             logging.info(f"\nMessage from {message.author.name} received:\n{message.content}\n")
             # The bot will show as typing while executing the code inside this block
             # So place your logic that takes time inside this block
@@ -102,7 +96,7 @@ class D15C0R6(commANDs.Bot):
                 messages = self.add_to_messages(message.channel.id, nickname, prompt_without_mention, "user")
                 # Add context to the prompt
                 logging.debug(f"\nSending usr_prompt to Grok\n{messages}\n")
-                response_text = self.get_response(messages, self.gpt_model, self.response_tokens, 1, 0.55)
+                response_text = self.get_response(messages, self.llm_model, self.response_tokens, 1, 0.55)
                 if response_text:
                     self.add_to_messages(message.channel.id, self.name, response_text, "assistant")
                     logging.debug(f"\nMessage history:\n{self.messages_by_channel[message.channel.id]}\n")
@@ -111,15 +105,15 @@ class D15C0R6(commANDs.Bot):
                     logging.error("No response from get_response")
 
         else:
-            if (message.author.id != self.self_author_id):
-                logging.info('message from else')
-                logging.info(f'-----\n`message.author.name`: `{message.author.name}`\n`message.channel.id`: `{message.channel.id}`,\n`message.channel.name`: `{message.channel.name}`,\n`message.id`: `{message.id}`,\n`message.author.id`: `{message.author.id}`\n')
+            if (message.author.id != self.user.id):
+                logging.info("message from else")
+                logging.info(f"-----\n`message.author.name`: `{message.author.name}`\n`message.channel.id`: `{message.channel.id}`,\n`message.channel.name`: `{message.channel.name}`,\n`message.id`: `{message.id}`,\n`message.author.id`: `{message.author.id}`\n")
             else:
-                logging.info = 'message from self . . . how did the code even get here !?'
-                logging.info(f'-----\n`message.author.name`: `{message.author.name}`\n`message.channel.id`: `{message.channel.id}`,\n`message.channel.name`: `{message.channel.name}`,\n`message.id`: `{message.id}`,\n`message.author.id`: `{message.author.id}`\n')
+                logging.info = "message from self . . . how did the code even get here !?"
+                logging.info(f"-----\n`message.author.name`: `{message.author.name}`\n`message.channel.id`: `{message.channel.id}`,\n`message.channel.name`: `{message.channel.name}`,\n`message.id`: `{message.id}`,\n`message.author.id`: `{message.author.id}`\n")
         # Always process commands at the end of the on_message event
         await self.process_commands(message)
-        logging.debug(f'\n-- END ON_MESSAGE --\n')
+        logging.debug(f"\n-- END ON_MESSAGE --\n")
 
     def add_to_messages(self, channel, nickname, message, role):
         if channel not in self.messages_by_channel:
@@ -133,7 +127,7 @@ class D15C0R6(commANDs.Bot):
         elif role == "user":
             self.messages_by_channel[channel].append({
                 "role": "user",
-                "content": f'{nickname} says, "{message}"'
+                "content": f"{nickname} says, `{message}`"
             })
         if len(self.messages_by_channel[channel]) > 11:  # Keep 7 messages for example
             self.messages_by_channel[channel].pop(1)

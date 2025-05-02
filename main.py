@@ -1,4 +1,4 @@
-# B07_C0R3.py
+# main.py
 import logging
 # Set logging.DEBUG to see ALL logs; set logging.INFO for less
 logging.basicConfig(level=logging.INFO)
