@@ -49,7 +49,11 @@ class D15C0R6(commANDs.Bot):
     # If you define an on_message event, the bot will not process commands automatically unless you explicitly call `await self.process_commands(message)`. This is because the `on_message`` event is processed before the command, so if you don't call `process_commands`, the command processing stops at `on_message`.
     async def on_message(self, message):
         logging.debug(f"\n-- BEGIN ON_MESSAGE --")
-        if message.channel.id in self.ignore_channel_ids:
+
+        if message.author == self.user:
+            logging.info("Ignoring message from self...")
+
+        elif message.channel.id in self.ignore_channel_ids:
             logging.info(f"Ignored Channel ID: {message.channel.name}\n")
 
         elif message.author.id in self.ignore_author_ids:
