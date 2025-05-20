@@ -1,6 +1,6 @@
 # _init__global.yaml
-messages_per_channel: 5
-llm_model: "grok-2-latest"
+messages_per_channel: 1
+llm_model: "grok-3-beta"
 llm_url: "https://api.x.ai/v1"
 response_tokens: 300 # 300 tokens normally fits in Discord's 2000 character limit
 ignored_prefixes:
@@ -11,12 +11,6 @@ ignored_prefixes:
   - ".delete"
   - ".purge"
   - ".shutdown"
-ignore_channel_ids:
-  - 
-ignore_author_ids:
-  - 
-allow_channel_ids: 
-  - 1091826868581302302
 allow_author_ids:
   - 465419968276594688 # c15n32
 intents:

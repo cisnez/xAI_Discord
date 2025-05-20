@@ -1,9 +1,11 @@
 # B07_C0R3.py
-import logging
 import asyncio
+from colorama import Fore
+import logging
 from discord.ext import commands as commANDs
 from discord import Intents as InTeNTs
 from discord import utils as UtIls
+from discord import errors
 
 class D15C0R6(commANDs.Bot):
     def __init__(self, xai_client, discord_token, bot_init_data, bot_name):
@@ -57,7 +59,7 @@ class D15C0R6(commANDs.Bot):
             if message.reference:  # Check if the message is a reply
                 try:
                     referenced_message = await message.channel.fetch_message(message.reference.message_id)
-                    if referenced_message.author.id == self.self_author_id:
+                    if referenced_message.author == self.user:
                         await referenced_message.delete()
                         logging.info(f"Deleted message from self, ID: {referenced_message.author.id}.")
                         # await message.delete()  # Delete the command message
@@ -71,6 +73,24 @@ class D15C0R6(commANDs.Bot):
         elif message.content.startswith(".hello"):
             logging.info(".hello")
             await message.channel.send("Hello Channel!")
+
+        elif message.content.startswith('.pin') and (message.author.id in self.allow_author_ids):
+            await self.handle_message_pin(message, action='pin')
+ 
+        elif message.content.startswith('.unpin') and (message.author.id in self.allow_author_ids):
+            await self.handle_message_pin(message, action='unpin')
+
+        elif message.content.startswith('.guilds'):
+            await self.list(message)
+
+        elif message.content.startswith('.leave') and (message.author.id in self.allow_author_ids):
+            await self.leave(message)
+
+        elif message.content.startswith('.delete') and (message.author.id in self.allow_author_ids):
+            if message.reference:  # Check if the message is a reply
+                await self.delete_referenced_message(message)
+            else:
+                await message.channel.send('What message do you want me to delete?')
 
         elif message.content.startswith(".shutdown") and (message.author.id in self.allow_author_ids):
             await message.channel.send("Shutting down...")
@@ -90,10 +110,7 @@ class D15C0R6(commANDs.Bot):
             member = message.author
             nickname = member.nick if member.nick is not None else member.display_name
             async with message.channel.typing():
-                # Remove bot's mention from the message
-                clean_message = UtIls.remove_markdown(str(self.user.mention))
-                prompt_without_mention = message.content.replace(clean_message, "").strip()
-                messages = self.add_to_messages(message.channel.id, nickname, prompt_without_mention, "user")
+                messages = self.add_to_messages(message.channel.id, nickname, message.content, "user")
                 # Add context to the prompt
                 logging.debug(f"\nSending usr_prompt to Grok\n{messages}\n")
                 response_text = self.get_response(messages, self.llm_model, self.response_tokens, 1, 0.55)
@@ -105,12 +122,8 @@ class D15C0R6(commANDs.Bot):
                     logging.error("No response from get_response")
 
         else:
-            if (message.author.id != self.user.id):
-                logging.info("message from else")
-                logging.info(f"-----\n`message.author.name`: `{message.author.name}`\n`message.channel.id`: `{message.channel.id}`,\n`message.channel.name`: `{message.channel.name}`,\n`message.id`: `{message.id}`,\n`message.author.id`: `{message.author.id}`\n")
-            else:
-                logging.info = "message from self . . . how did the code even get here !?"
-                logging.info(f"-----\n`message.author.name`: `{message.author.name}`\n`message.channel.id`: `{message.channel.id}`,\n`message.channel.name`: `{message.channel.name}`,\n`message.id`: `{message.id}`,\n`message.author.id`: `{message.author.id}`\n")
+            logging.info(f"-----\n`message.author.name`: `{message.author.name}`\n`message.channel.id`: `{message.channel.id}`,\n`message.channel.name`: `{message.channel.name}`,\n`message.id`: `{message.id}`,\n`message.author.id`: `{message.author.id}`")
+
         # Always process commands at the end of the on_message event
         await self.process_commands(message)
         logging.debug(f"\n-- END ON_MESSAGE --\n")
@@ -155,3 +168,58 @@ class D15C0R6(commANDs.Bot):
             exception_error = (f"Error in get_response: {e}")
             logging.error(exception_error)
             return exception_error
+
+    async def handle_message_pin(self, message, action):
+        if message.reference:
+            try:
+                replied_message = await message.channel.fetch_message(message.reference.message_id)
+                logging.info(f'{Fore.YELLOW}{action.capitalize()}ning Message: {Fore.CYAN}{replied_message.content}')
+                if action == 'pin':
+                    await replied_message.pin()
+                else:  # action == 'unpin'
+                    await replied_message.unpin()
+            except errors.Forbidden:
+                await message.channel.send(f"I don't have permission to {action} that message.")  # Notify the user in the channel
+                logging.error(f"{Fore.YELLOW}Failed to {Fore.RED}{action} {Fore.YELLOW}message due to Error:\n{Fore.RED}Forbidden error (50013): Missing Permissions")
+            except Exception as e:  # Optional: Catch other unexpected errors for robustness
+                logging.error(f"{Fore.RED}An unexpected error occurred while {Fore.GREEN}{action}ning the message: {Fore.RED}{e}")
+                await message.channel.send(f"Something went wrong while trying to {action} the message. Please check logs.")
+        else:
+            await message.channel.send(f'Please reply to a message to {action} it.')
+
+    async def list(self, message):
+        guilds = self.guilds  # Get the list of guilds
+        if guilds:  # Check if there are any guilds
+            guild_list = []  # Create a list to store formatted strings
+            for guild in guilds:
+                guild_list.append(f"{guild.name} (ID: {guild.id})")  # Format as "Name (ID: 123456789012345678)"
+            await message.channel.send(f"**Guilds:**\n{'\n'.join(guild_list)}")  # Send as a multi-line string
+        else:
+            await message.channel.send("No guilds found.")
+    
+    async def leave(self, message):
+        try:
+            parts = message.content.split()
+            if len(parts) < 2:
+                await message.channel.send("Usage: .leave <server_id>")
+                return
+            server_id = int(parts[1])
+            guild = self.get_guild(server_id)
+            if guild:
+                await guild.leave()
+                await message.channel.send(f"Successfully left the guild: {guild.name}")
+            else:
+                await message.channel.send("I'm not in that guild or the ID is invalid.")
+        except ValueError:
+            await message.channel.send("Invalid server ID. Please provide a valid numeric ID.")
+        except Exception as e:
+            await message.channel.send(f"An error occurred: {str(e)}")
+
+    async def delete_referenced_message(self, message):
+        try:
+            referenced_message = await message.channel.fetch_message(message.reference.message_id)
+            logging.info(f'{Fore.YELLOW}Deleting message by: {Fore.BLUE}{referenced_message.author}.')
+            await referenced_message.delete()
+        except Exception as e:
+            await message.channel.send(f'Error deleting message: {e}')
+            logging.error(f'{Fore.YELLOW}Error deleting message: {Fore.RED}{e}')
